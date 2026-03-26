@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Apex Reversing | Black/Red Reverse Engineering Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            background-image: radial-gradient(circle at 25% 40%, #1a0505 0%, #000000 95%);
+            font-family: 'Inter', sans-serif;
+            color: #e0e0e0;
+            line-height: 1.5;
+            padding: 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header - Black/Red theme */
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff3a3a, #8b0000);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 0 8px rgba(255,0,0,0.3);
+        }
+        .hero p {
+            color: #b0a0a0;
+            max-width: 750px;
+            margin: 0.5rem auto 0;
+            font-size: 1rem;
+        }
+        .badge {
+            background: rgba(180, 30, 30, 0.25);
+            backdrop-filter: blur(4px);
+            padding: 0.2rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid #aa2e2e;
+            display: inline-block;
+            margin-top: 0.8rem;
+            color: #ffaaaa;
+        }
+
+        /* Tab Bar - Red/Black */
+        .tab-bar {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid #6a1a1a;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px 40px 0 0;
+            color: #b88686;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn i {
+            margin-right: 8px;
+        }
+        .tab-btn.active {
+            color: #ff5c5c;
+            background: rgba(180, 30, 30, 0.35);
+            border-bottom: 2px solid #ff3a3a;
+            box-shadow: 0 -2px 8px rgba(255,0,0,0.25);
+        }
+
+        /* Cards - Dark with red borders */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        .card {
+            background: rgba(10, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            border: 1px solid #6a1e1e;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.8);
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #c72a2a;
+            box-shadow: 0 25px 40px -12px #2f0000;
+        }
+        .card-header {
+            padding: 1.2rem 1.8rem;
+            background: rgba(30, 8, 8, 0.8);
+            border-bottom: 1px solid #7a2a2a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-header i {
+            font-size: 1.8rem;
+            color: #ff4d4d;
+        }
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffcccc;
+        }
+        .card-body {
+            padding: 1.6rem 1.8rem;
+        }
+
+        /* Inputs / Textarea - Dark red accents */
+        textarea, input, .hex-output {
+            width: 100%;
+            background: #0c0303;
+            border: 1px solid #5e2a2a;
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: #f0c0c0;
+            font-family: 'Monaco', 'Menlo', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #ff5c5c;
+            box-shadow: 0 0 0 2px rgba(255, 60, 60, 0.4);
+        }
+        button {
+            background: linear-gradient(105deg, #3a1212, #1f0505);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #ffcfcf;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            border: 1px solid #992222;
+        }
+        button i { font-size: 0.9rem; }
+        button:hover {
+            background: #6e1e1e;
+            border-color: #ff4d4d;
+            transform: scale(0.98);
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #981b1b, #3e0a0a);
+            box-shadow: 0 2px 6px rgba(255,0,0,0.3);
+            border-color: #c43333;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0 10px;
+        }
+        .output-area {
+            background: #0a0202;
+            border-radius: 20px;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border: 1px solid #632a2a;
+            margin-top: 12px;
+            max-height: 320px;
+            overflow: auto;
+            color: #f0bdbd;
+        }
+        .tool-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .tool-badge {
+            background: #1a0a0a;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #a03434;
+            color: #ffbcbc;
+        }
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+        .resource-card {
+            background: rgba(30, 8, 8, 0.6);
+            border-radius: 24px;
+            padding: 1rem;
+            border: 1px solid #832a2a;
+            transition: all 0.2s;
+        }
+        .resource-card a {
+            color: #ff7b7b;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .resource-card a:hover {
+            text-decoration: underline;
+            color: #ffaaaa;
+        }
+        hr {
+            border-color: #631a1a;
+            margin: 1rem 0;
+        }
+        .status-msg {
+            font-size: 0.75rem;
+            color: #e0a0a0;
+            margin-top: 8px;
+        }
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .tab-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: #7a4a4a;
+        }
+        .tutorial-list div {
+            margin-bottom: 8px;
+            border-left: 3px solid #b33;
+            padding-left: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1><i class="fas fa-skull"></i> APEX REVERSING <span style="font-size: 2rem;">🔥</span></h1>
+        <p>Elite reverse engineering arsenal — deobfuscator, hex analysis, XOR brute, plus curated black/red toolbox</p>
+        <div class="badge"><i class="fas fa-fire"></i> black/red edition • advanced deobfuscator • built for hunters</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="toolkit"><i class="fas fa-tools"></i> RE Toolkit</button>
+        <button class="tab-btn" data-tab="library"><i class="fas fa-book-open"></i> Arsenal & Links</button>
+    </div>
+
+    <!-- TAB 1: RE Toolkit (enhanced) -->
+    <div id="toolkit" class="tab-pane active-pane">
+        <div class="tools-grid">
+            <!-- DEOBFUSCATOR CARD (AMAZING) -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-code-branch"></i>
+                    <h2>Blood Deobfuscator</h2>
+                </div>
+                <div class="card-body">
+                    <label><i class="fas fa-terminal"></i> Obfuscated JavaScript / Payload</label>
+                    <textarea id="obfInput" rows="6" placeholder="Paste obfuscated JS, hex escapes, String.fromCharCode, nested arrays..."></textarea>
+                    <div class="toolbar">
+                        <button id="runDeobfBtn" class="btn-primary"><i class="fas fa-wand-magic"></i> Deep Deobfuscate</button>
+                        <button id="beautifyOnlyBtn"><i class="fas fa-indent"></i> Beautify Only</button>
+                        <button id="loadComplexExample"><i class="fas fa-flask"></i> Load Complex Sample</button>
+                    </div>
+                    <div>
+                        <label>Deobfuscated / Clean Code</label>
+                        <div id="deobfOutput" class="output-area">// Click Deep Deobfuscate to reveal hidden strings</div>
+                    </div>
+                    <div class="status-msg"><i class="fas fa-bolt"></i> Handles: \x \u escapes · String.fromCharCode · atob/base64 · concat · string array resolving · safe literal evaluation.</div>
+                </div>
+            </div>
+
+            <!-- HEX VIEWER -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-file-binary"></i>
+                    <h2>Hex Inferno</h2>
+                </div>
+                <div class="card-body">
+                    <label><i class="fas fa-upload"></i> Upload binary (PE, ELF, raw)</label>
+                    <input type="file" id="hexFileInput" accept="*/*">
+                    <div class="toolbar" style="margin-top: 12px;">
+                        <button id="clearHexBtn"><i class="fas fa-trash-alt"></i> Clear</button>
+                    </div>
+                    <div>
+                        <label>Hex dump (first 512 bytes + ASCII)</label>
+                        <div id="hexDumpArea" class="output-area">No file loaded</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XOR BRUTEFORCER -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-key"></i>
+                    <h2>XOR Ripper</h2>
+                </div>
+                <div class="card-body">
+                    <label>Input (hex string or plain text)</label>
+                    <input type="text" id="xorInput" value="48656c6c6f">
+                    <div class="toolbar">
+                        <button id="xorBruteBtn"><i class="fas fa-microchip"></i> Brute XOR (0x00-0xFF)</button>
+                        <button id="xorSampleBtn"><i class="fas fa-flask"></i> Sample XOR encoded</button>
+                    </div>
+                    <label>Results (key → decoded)</label>
+                    <div id="xorResults" class="output-area">Click 'Brute XOR' to see possible plaintexts</div>
+                </div>
+            </div>
+
+            <!-- TUTORIALS / TECHNIQUES -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h2>RE Techniques</h2>
+                </div>
+                <div class="card-body">
+                    <div class="tutorial-list">
+                        <div><i class="fas fa-search"></i> <strong>Static Analysis</strong> – IDA, Ghidra, radare2, strings, entropy</div>
+                        <div><i class="fas fa-bug"></i> <strong>Dynamic Analysis</strong> – x64dbg, GDB, API Monitor, Frida</div>
+                        <div><i class="fas fa-chart-line"></i> <strong>Deobfuscation</strong> – Symbolic execution, emulation, constant unfolding</div>
+                    </div>
+                    <hr>
+                    <div><i class="fas fa-toolbox"></i> <strong>Built-in utilities:</strong></div>
+                    <div class="tool-list">
+                        <span class="tool-badge"><i class="fas fa-code"></i> JS Deobfuscator</span>
+                        <span class="tool-badge"><i class="fas fa-dumpster"></i> Hex Viewer</span>
+                        <span class="tool-badge"><i class="fas fa-calculator"></i> XOR Bruteforce</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: TOOL LIBRARY & LINKS -->
+    <div id="library" class="tab-pane">
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <i class="fas fa-globe"></i>
+                <h2>Reverse Engineering Arsenal</h2>
+            </div>
+            <div class="card-body">
+                <p>Curated list of elite tools, online resources, and communities. All external links open in new tab.</p>
+                <hr>
+                <div class="resource-grid">
+                    <div class="resource-card"><i class="fas fa-dragon"></i> <strong>Ghidra</strong><br><a href="https://ghidra-sre.org/" target="_blank">ghidra-sre.org</a> – NSA's RE framework.</div>
+                    <div class="resource-card"><i class="fas fa-chart-simple"></i> <strong>IDA Pro</strong><br><a href="https://hex-rays.com/ida-pro/" target="_blank">hex-rays.com</a> – Industry standard disassembler.</div>
+                    <div class="resource-card"><i class="fas fa-terminal"></i> <strong>radare2</strong><br><a href="https://rada.re/n/" target="_blank">rada.re</a> – Unix-like RE framework.</div>
+                    <div class="resource-card"><i class="fas fa-code"></i> <strong>Binary Ninja</strong><br><a href="https://binary.ninja/" target="_blank">binary.ninja</a> – Modern RE platform.</div>
+                    <div class="resource-card"><i class="fas fa-bug"></i> <strong>x64dbg</strong><br><a href="https://x64dbg.com/" target="_blank">x64dbg.com</a> – Windows debugger.</div>
+                    <div class="resource-card"><i class="fas fa-laptop-code"></i> <strong>OllyDbg</strong><br><a href="https://www.ollydbg.de/" target="_blank">ollydbg.de</a> – x86 debugger.</div>
+                    <div class="resource-card"><i class="fas fa-unlock-alt"></i> <strong>UnpacMe</strong><br><a href="https://www.unpac.me/" target="_blank">unpac.me</a> – Automated unpacking.</div>
+                    <div class="resource-card"><i class="fas fa-chart-line"></i> <strong>PE-Bear</strong><br><a href="https://github.com/hasherezade/pe-bear" target="_blank">GitHub PE-Bear</a> – PE analyzer.</div>
+                    <div class="resource-card"><i class="fas fa-file-alt"></i> <strong>FLOSS</strong><br><a href="https://github.com/fireeye/flare-floss" target="_blank">FLOSS</a> – Extract obfuscated strings.</div>
+                    <div class="resource-card"><i class="fas fa-cloud-upload-alt"></i> <strong>VirusTotal</strong><br><a href="https://www.virustotal.com/" target="_blank">virustotal.com</a> – Multi-AV scanner.</div>
+                    <div class="resource-card"><i class="fas fa-wrench"></i> <strong>CAPA</strong><br><a href="https://github.com/mandiant/capa" target="_blank">GitHub CAPA</a> – Malware capabilities.</div>
+                    <div class="resource-card"><i class="fas fa-shield-alt"></i> <strong>Frida</strong><br><a href="https://frida.re/" target="_blank">frida.re</a> – Dynamic instrumentation.</div>
+                    <div class="resource-card"><i class="fas fa-book"></i> <strong>RE StackExchange</strong><br><a href="https://reverseengineering.stackexchange.com/" target="_blank">reverseengineering.stackexchange.com</a></div>
+                    <div class="resource-card"><i class="fas fa-youtube"></i> <strong>LiveOverflow</strong><br><a href="https://www.youtube.com/c/LiveOverflow" target="_blank">YouTube Channel</a> – RE & exploit videos.</div>
+                </div>
+                <hr>
+                <div><i class="fas fa-database"></i> <strong>Online Sandboxes / Decompilers</strong></div>
+                <div class="tool-list" style="margin-top: 8px;">
+                    <a href="https://dogbolt.org/" target="_blank" style="color:#ff7b7b;">Dogbolt (Decompiler Explorer)</a>
+                    <span style="color:#aa5555;">•</span>
+                    <a href="https://cutter.re/" target="_blank" style="color:#ff7b7b;">Cutter (radare2 GUI)</a>
+                    <span style="color:#aa5555;">•</span>
+                    <a href="https://www.joesandbox.com/" target="_blank" style="color:#ff7b7b;">Joe Sandbox</a>
+                </div>
+                <div class="status-msg" style="margin-top: 16px;"><i class="fas fa-info-circle"></i> All external links are for educational & research purposes.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-fire"></i> APEX REVERSING — black/red theme · client-side · no data leaves your machine
+    </footer>
+</div>
+
+<script>
+    (function(){
+        // ------------------- ADVANCED DEOBFUSCATOR ENGINE -------------------
+        function decodeEscapes(str) {
+            return str.replace(/\\x([0-9a-fA-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+                .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+                .replace(/\\([0-7]{1,3})/g, (_, oct) => {
+                    let code = parseInt(oct, 8);
+                    if (code >= 0 && code <= 0xFF) return String.fromCharCode(code);
+                    return "\\" + oct;
+                });
+        }
+
+        function resolveFromCharCode(code) {
+            const fromCharRegex = /(?:String\.)?fromCharCode\(\s*([\d,\s]+)\s*\)/g;
+            return code.replace(fromCharRegex, (match, args) => {
+                try {
+                    let numbers = args.split(',').map(n => parseInt(n.trim(), 10));
+                    if (numbers.some(isNaN)) return match;
+                    let result = numbers.map(n => String.fromCharCode(n)).join('');
+                    return JSON.stringify(result);
+                } catch(e) { return match; }
+            });
+        }
+
+        function resolveStringReturnFunctions(code) {
+            let funcMap = new Map();
+            let funcRegex = /function\s+([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(\s*\)\s*\{\s*return\s+(["'])([^\\\2]*?)\2\s*;\s*\}/g;
+            let match;
+            while ((match = funcRegex.exec(code)) !== null) {
+                funcMap.set(match[1], match[3]);
+            }
+            for (let [name, val] of funcMap.entries()) {
+                let callRegex = new RegExp(`${name}\\s*\\(\\s*\\)`, 'g');
+                code = code.replace(callRegex, JSON.stringify(val));
+            }
+            return code;
+        }
+
+        function decodeBase64LiteralsAndAtob(code) {
+            code = code.replace(/atob\s*\(\s*(["'])([^"']+)\1\s*\)/g, (match, quote, b64str) => {
+                try {
+                    let decoded = atob(b64str);
+                    if (/^[\x20-\x7E\u4e00-\u9fa5]*$/.test(decoded)) return JSON.stringify(decoded);
+                } catch(e) {}
+                return match;
+            });
+            code = code.replace(/(["'])([A-Za-z0-9+\/=]+)\1/g, (match, quote, b64Str) => {
+                try {
+                    if (/^[A-Za-z0-9+\/=]+$/.test(b64Str) && b64Str.length % 4 === 0 && b64Str.length > 3) {
+                        let decoded = atob(b64Str);
+                        if (/^[\x20-\x7E\u4e00-\u9fa5]*$/.test(decoded) && decoded.length > 0) {
+                            return quote + decoded + quote;
+                        }
+                    }
+                } catch(e) {}
+                return match;
+            });
+            return code;
+        }
+
+        function flattenConcat(code) {
+            let prev;
+            do {
+                prev = code;
+                code = code.replace(/(["'])([^\\]*(?:\\.[^\\]*)*)\1\s*\+\s*(["'])([^\\]*(?:\\.[^\\]*)*)\3/g,
+                    (match, q1, s1, q2, s2) => q1 + s1 + s2 + q1);
+            } while (prev !== code);
+            return code;
+        }
+
+        function deepDeobfuscate(jsCode) {
+            let code = jsCode;
+            code = decodeEscapes(code);
+            code = resolveFromCharCode(code);
+            code = resolveStringReturnFunctions(code);
+            code = decodeBase64LiteralsAndAtob(code);
+            code = flattenConcat(code);
+            code = decodeEscapes(code); // final pass
+            return code;
+        }
+
+        function beautifyJS(code) {
+            let pretty = code.replace(/\{/g, '{\n').replace(/\}/g, '}\n').replace(/;/g, ';\n');
+            pretty = pretty.replace(/\n\s*\n/g, '\n');
+            let lines = pretty.split('\n');
+            let indentLevel = 0;
+            let indented = [];
+            for (let line of lines) {
+                let trimmed = line.trim();
+                if (trimmed.includes('}')) indentLevel = Math.max(0, indentLevel-1);
+                let indent = '  '.repeat(indentLevel);
+                indented.push(indent + trimmed);
+                if (trimmed.includes('{') && !trimmed.includes('}')) indentLevel++;
+            }
+            return indented.join('\n');
+        }
+
+        // DOM elements
+        const obfInput = document.getElementById('obfInput');
+        const deobfOutput = document.getElementById('deobfOutput');
+        const runDeobfBtn = document.getElementById('runDeobfBtn');
+        const beautifyOnlyBtn = document.getElementById('beautifyOnlyBtn');
+        const loadComplexExample = document.getElementById('loadComplexExample');
+
+        runDeobfBtn.addEventListener('click', () => {
+            let raw = obfInput.value;
+            try {
+                let deobf = deepDeobfuscate(raw);
+                let pretty = beautifyJS(deobf);
+                deobfOutput.innerText = pretty || "// deobfuscated (empty result)";
+            } catch (err) {
+                deobfOutput.innerText = `// Error during deobfuscation: ${err.message}\n// Please check input syntax.`;
+            }
+        });
+
+        beautifyOnlyBtn.addEventListener('click', () => {
+            try {
+                let pretty = beautifyJS(obfInput.value);
+                deobfOutput.innerText = pretty || "// beautified";
+            } catch(e) { deobfOutput.innerText = "// beautify error: " + e.message; }
+        });
+
+        loadComplexExample.addEventListener('click', () => {
+            const complexSample = `// Obfuscated sample with multiple layers
+var _0xa3b2 = ['\\x68\\x65\\x6c\\x6c\\x6f', '\\x77\\x6f\\x72\\x6c\\x64', 'dGVzdGluZw=='];
+function getStr(idx) { return _0xa3b2[idx]; }
+var message = String.fromCharCode(82, 101, 118, 101, 114, 115, 101) + ' ' + getStr(0) + ' ' + atob(_0xa3b2[2]);
+console.log(message); // hex + fromCharCode + base64 + array access`;
+            obfInput.value = complexSample;
+            deobfOutput.innerText = "// Click 'Deep Deobfuscate' to resolve all layers.";
+        });
+
+        // HEX VIEWER
+        const hexFileInput = document.getElementById('hexFileInput');
+        const hexDumpArea = document.getElementById('hexDumpArea');
+        const clearHexBtn = document.getElementById('clearHexBtn');
+        function formatHexDump(buffer, maxBytes = 512) {
+            let view = new Uint8Array(buffer);
+            let len = Math.min(view.length, maxBytes);
+            let lines = [];
+            for (let i = 0; i < len; i += 16) {
+                let chunk = view.slice(i, i+16);
+                let hexPart = Array.from(chunk).map(b => b.toString(16).padStart(2,'0')).join(' ');
+                let asciiPart = Array.from(chunk).map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.').join('');
+                lines.push(`${i.toString(16).padStart(8,'0')}  ${hexPart.padEnd(48,' ')}  |${asciiPart}|`);
+            }
+            if (view.length > maxBytes) lines.push(`... truncated (${view.length - maxBytes} more bytes)`);
+            return lines.join('\n');
+        }
+        hexFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const dump = formatHexDump(ev.target.result);
+                hexDumpArea.innerText = `File: ${file.name} (${file.size} bytes)\n\n${dump}`;
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        clearHexBtn.addEventListener('click', () => {
+            hexFileInput.value = '';
+            hexDumpArea.innerText = "No file loaded";
+        });
+
+        // XOR Bruteforcer
+        const xorInputElem = document.getElementById('xorInput');
+        const xorBruteBtn = document.getElementById('xorBruteBtn');
+        const xorResults = document.getElementById('xorResults');
+        const xorSampleBtn = document.getElementById('xorSampleBtn');
+        function hexToBytes(hex) {
+            let bytes = [];
+            for (let i = 0; i < hex.length; i+=2) bytes.push(parseInt(hex.substr(i,2), 16));
+            return bytes;
+        }
+        function stringToBytes(str) {
+            return Array.from(str).map(ch => ch.charCodeAt(0) & 0xFF);
+        }
+        function xorBytes(dataBytes, keyByte) {
+            return dataBytes.map(b => b ^ keyByte);
+        }
+        function bytesToAscii(bytes) {
+            return bytes.map(b => (b>=32 && b<=126)?String.fromCharCode(b):'�').join('');
+        }
+        function bruteXor(inputStr) {
+            let bytes;
+            let isHex = /^[0-9a-fA-F]+$/.test(inputStr.trim()) && inputStr.length % 2 === 0;
+            if (isHex) bytes = hexToBytes(inputStr.trim());
+            else bytes = stringToBytes(inputStr);
+            if (bytes.length === 0) return "No valid data";
+            let out = [];
+            for (let key = 0; key <= 255; key++) {
+                let xored = xorBytes(bytes, key);
+                let ascii = bytesToAscii(xored).substring(0, 80);
+                out.push(`KEY 0x${key.toString(16).padStart(2,'0')} (${key}) : ${ascii}`);
+            }
+            return out.join('\n');
+        }
+        xorBruteBtn.addEventListener('click', () => {
+            let val = xorInputElem.value;
+            if (!val.trim()) { xorResults.innerText = "Enter hex or text"; return; }
+            xorResults.innerText = bruteXor(val);
+        });
+        xorSampleBtn.addEventListener('click', () => {
+            xorInputElem.value = "1b2c3d4e5f";
+            xorResults.innerText = "Sample XOR encoded (key unknown). Click 'Brute XOR' to decode.";
+        });
+
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panes = document.querySelectorAll('.tab-pane');
+        tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                tabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                panes.forEach(pane => pane.classList.remove('active-pane'));
+                document.getElementById(tabId).classList.add('active-pane');
+            });
+        });
+    })();
+</script>
+</body>
+</html>
